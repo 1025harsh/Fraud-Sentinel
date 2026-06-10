@@ -15,6 +15,9 @@ import TransactionDetail from "@/pages/transaction-detail";
 import Cards from "@/pages/cards";
 import Alerts from "@/pages/alerts";
 import Admin from "@/pages/admin";
+import CommandCenter from "@/pages/command-center";
+import VirtualCards from "@/pages/virtual-cards";
+import Security from "@/pages/security";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -84,6 +87,9 @@ function AppRouter() {
       <Route path="/cards" component={() => <ProtectedRoute component={Cards} />} />
       <Route path="/alerts" component={() => <ProtectedRoute component={Alerts} />} />
       <Route path="/admin" component={() => <ProtectedRoute component={Admin} adminOnly />} />
+      <Route path="/command-center" component={() => <ProtectedRoute component={CommandCenter} />} />
+      <Route path="/virtual-cards" component={() => <ProtectedRoute component={VirtualCards} />} />
+      <Route path="/security" component={() => <ProtectedRoute component={Security} />} />
       <Route component={NotFound} />
     </Switch>
   );

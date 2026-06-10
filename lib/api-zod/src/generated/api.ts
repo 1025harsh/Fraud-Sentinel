@@ -449,3 +449,154 @@ export const ListFraudLogsResponse = zod.object({
 })
 
 
+/**
+ * @summary List user's virtual cards
+ */
+export const ListVirtualCardsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "cardNumber": zod.string(),
+  "last4": zod.string(),
+  "brand": zod.string(),
+  "cvv": zod.string(),
+  "expiryMonth": zod.number(),
+  "expiryYear": zod.number(),
+  "isActive": zod.boolean(),
+  "usageLimit": zod.number(),
+  "timesUsed": zod.number(),
+  "note": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "expiresAt": zod.string().nullish()
+})
+export const ListVirtualCardsResponse = zod.array(ListVirtualCardsResponseItem)
+
+
+/**
+ * @summary Generate a virtual credit card
+ */
+export const generateVirtualCardBodyUsageLimitDefault = 1;
+export const generateVirtualCardBodyValidHoursDefault = 24;
+
+export const GenerateVirtualCardBody = zod.object({
+  "usageLimit": zod.number().default(generateVirtualCardBodyUsageLimitDefault),
+  "note": zod.string().optional(),
+  "validHours": zod.number().default(generateVirtualCardBodyValidHoursDefault)
+})
+
+
+/**
+ * @summary Deactivate a virtual card
+ */
+export const DeactivateVirtualCardParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeactivateVirtualCardResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "cardNumber": zod.string(),
+  "last4": zod.string(),
+  "brand": zod.string(),
+  "cvv": zod.string(),
+  "expiryMonth": zod.number(),
+  "expiryYear": zod.number(),
+  "isActive": zod.boolean(),
+  "usageLimit": zod.number(),
+  "timesUsed": zod.number(),
+  "note": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "expiresAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Get login history for current user
+ */
+export const getLoginHistoryQueryLimitDefault = 20;
+
+export const GetLoginHistoryQueryParams = zod.object({
+  "limit": zod.coerce.number().default(getLoginHistoryQueryLimitDefault)
+})
+
+export const GetLoginHistoryResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "ipAddress": zod.string().nullish(),
+  "userAgent": zod.string().nullish(),
+  "deviceFingerprint": zod.string().nullish(),
+  "deviceName": zod.string().nullish(),
+  "location": zod.string().nullish(),
+  "isTrusted": zod.boolean().optional(),
+  "loginAt": zod.string()
+})
+export const GetLoginHistoryResponse = zod.array(GetLoginHistoryResponseItem)
+
+
+/**
+ * @summary Get trusted devices
+ */
+export const GetTrustedDevicesResponseItem = zod.object({
+  "id": zod.number(),
+  "deviceName": zod.string(),
+  "deviceFingerprint": zod.string(),
+  "location": zod.string().nullish(),
+  "loginAt": zod.string(),
+  "isTrusted": zod.boolean()
+})
+export const GetTrustedDevicesResponse = zod.array(GetTrustedDevicesResponseItem)
+
+
+/**
+ * @summary Remove a trusted device
+ */
+export const RemoveDeviceParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const RemoveDeviceResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Get latest transactions for live feed
+ */
+export const getLiveFeedQueryLimitDefault = 10;
+
+export const GetLiveFeedQueryParams = zod.object({
+  "since": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().default(getLiveFeedQueryLimitDefault)
+})
+
+export const GetLiveFeedResponse = zod.object({
+  "events": zod.array(zod.object({
+  "id": zod.number(),
+  "type": zod.string(),
+  "amount": zod.number(),
+  "merchant": zod.string(),
+  "merchantCategory": zod.string().optional(),
+  "riskLevel": zod.string(),
+  "riskScore": zod.number().optional(),
+  "fraudProbability": zod.number().optional(),
+  "status": zod.string(),
+  "cardLast4": zod.string().nullish(),
+  "location": zod.string().nullish(),
+  "createdAt": zod.string()
+})),
+  "serverTime": zod.string()
+})
+
+
+/**
+ * @summary Command center live stats
+ */
+export const GetCommandCenterStatsResponse = zod.object({
+  "fraudLast24h": zod.number(),
+  "blockedCards": zod.number(),
+  "activeAlerts": zod.number(),
+  "totalToday": zod.number(),
+  "threatLevel": zod.string(),
+  "autoBlocked": zod.number()
+})
+
+

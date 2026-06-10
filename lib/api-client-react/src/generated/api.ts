@@ -28,24 +28,33 @@ import type {
   Card,
   CardBlockInput,
   CardInput,
+  CommandCenterStats,
   DashboardSummary,
   ErrorResponse,
   FraudLogListResponse,
   FraudTrendPoint,
+  GenerateVirtualCardInput,
+  GetLiveFeedParams,
+  GetLoginHistoryParams,
   HealthStatus,
   ListAlertsParams,
   ListFraudLogsParams,
   ListTransactionsParams,
+  LiveFeedResponse,
+  LoginEvent,
   LoginInput,
   MessageResponse,
   RegisterInput,
   RiskBreakdownItem,
+  SuccessMessage,
   Transaction,
   TransactionInput,
   TransactionListResponse,
   TransactionReview,
+  TrustedDevice,
   User,
-  UserListResponse
+  UserListResponse,
+  VirtualCard
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -1794,6 +1803,616 @@ export function useListFraudLogs<TData = Awaited<ReturnType<typeof listFraudLogs
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getListFraudLogsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getListVirtualCardsUrl = () => {
+
+
+
+
+  return `/api/virtual-cards`
+}
+
+/**
+ * @summary List user's virtual cards
+ */
+export const listVirtualCards = async ( options?: RequestInit): Promise<VirtualCard[]> => {
+
+  return customFetch<VirtualCard[]>(getListVirtualCardsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListVirtualCardsQueryKey = () => {
+    return [
+    `/api/virtual-cards`
+    ] as const;
+    }
+
+
+export const getListVirtualCardsQueryOptions = <TData = Awaited<ReturnType<typeof listVirtualCards>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listVirtualCards>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListVirtualCardsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listVirtualCards>>> = ({ signal }) => listVirtualCards({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listVirtualCards>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListVirtualCardsQueryResult = NonNullable<Awaited<ReturnType<typeof listVirtualCards>>>
+export type ListVirtualCardsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List user's virtual cards
+ */
+
+export function useListVirtualCards<TData = Awaited<ReturnType<typeof listVirtualCards>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listVirtualCards>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListVirtualCardsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGenerateVirtualCardUrl = () => {
+
+
+
+
+  return `/api/virtual-cards/generate`
+}
+
+/**
+ * @summary Generate a virtual credit card
+ */
+export const generateVirtualCard = async (generateVirtualCardInput: GenerateVirtualCardInput, options?: RequestInit): Promise<VirtualCard> => {
+
+  return customFetch<VirtualCard>(getGenerateVirtualCardUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      generateVirtualCardInput,)
+  }
+);}
+
+
+
+
+export const getGenerateVirtualCardMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateVirtualCard>>, TError,{data: BodyType<GenerateVirtualCardInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof generateVirtualCard>>, TError,{data: BodyType<GenerateVirtualCardInput>}, TContext> => {
+
+const mutationKey = ['generateVirtualCard'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof generateVirtualCard>>, {data: BodyType<GenerateVirtualCardInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  generateVirtualCard(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GenerateVirtualCardMutationResult = NonNullable<Awaited<ReturnType<typeof generateVirtualCard>>>
+    export type GenerateVirtualCardMutationBody = BodyType<GenerateVirtualCardInput>
+    export type GenerateVirtualCardMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Generate a virtual credit card
+ */
+export const useGenerateVirtualCard = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateVirtualCard>>, TError,{data: BodyType<GenerateVirtualCardInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof generateVirtualCard>>,
+        TError,
+        {data: BodyType<GenerateVirtualCardInput>},
+        TContext
+      > => {
+      return useMutation(getGenerateVirtualCardMutationOptions(options));
+    }
+
+export const getDeactivateVirtualCardUrl = (id: number,) => {
+
+
+
+
+  return `/api/virtual-cards/${id}/deactivate`
+}
+
+/**
+ * @summary Deactivate a virtual card
+ */
+export const deactivateVirtualCard = async (id: number, options?: RequestInit): Promise<VirtualCard> => {
+
+  return customFetch<VirtualCard>(getDeactivateVirtualCardUrl(id),
+  {
+    ...options,
+    method: 'PATCH'
+
+
+  }
+);}
+
+
+
+
+export const getDeactivateVirtualCardMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deactivateVirtualCard>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deactivateVirtualCard>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deactivateVirtualCard'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deactivateVirtualCard>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deactivateVirtualCard(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeactivateVirtualCardMutationResult = NonNullable<Awaited<ReturnType<typeof deactivateVirtualCard>>>
+
+    export type DeactivateVirtualCardMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Deactivate a virtual card
+ */
+export const useDeactivateVirtualCard = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deactivateVirtualCard>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deactivateVirtualCard>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeactivateVirtualCardMutationOptions(options));
+    }
+
+export const getGetLoginHistoryUrl = (params?: GetLoginHistoryParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/security/login-history?${stringifiedParams}` : `/api/security/login-history`
+}
+
+/**
+ * @summary Get login history for current user
+ */
+export const getLoginHistory = async (params?: GetLoginHistoryParams, options?: RequestInit): Promise<LoginEvent[]> => {
+
+  return customFetch<LoginEvent[]>(getGetLoginHistoryUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLoginHistoryQueryKey = (params?: GetLoginHistoryParams,) => {
+    return [
+    `/api/security/login-history`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetLoginHistoryQueryOptions = <TData = Awaited<ReturnType<typeof getLoginHistory>>, TError = ErrorType<unknown>>(params?: GetLoginHistoryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLoginHistory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLoginHistoryQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLoginHistory>>> = ({ signal }) => getLoginHistory(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLoginHistory>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLoginHistoryQueryResult = NonNullable<Awaited<ReturnType<typeof getLoginHistory>>>
+export type GetLoginHistoryQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get login history for current user
+ */
+
+export function useGetLoginHistory<TData = Awaited<ReturnType<typeof getLoginHistory>>, TError = ErrorType<unknown>>(
+ params?: GetLoginHistoryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLoginHistory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLoginHistoryQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetTrustedDevicesUrl = () => {
+
+
+
+
+  return `/api/security/devices`
+}
+
+/**
+ * @summary Get trusted devices
+ */
+export const getTrustedDevices = async ( options?: RequestInit): Promise<TrustedDevice[]> => {
+
+  return customFetch<TrustedDevice[]>(getGetTrustedDevicesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTrustedDevicesQueryKey = () => {
+    return [
+    `/api/security/devices`
+    ] as const;
+    }
+
+
+export const getGetTrustedDevicesQueryOptions = <TData = Awaited<ReturnType<typeof getTrustedDevices>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTrustedDevices>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTrustedDevicesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTrustedDevices>>> = ({ signal }) => getTrustedDevices({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTrustedDevices>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetTrustedDevicesQueryResult = NonNullable<Awaited<ReturnType<typeof getTrustedDevices>>>
+export type GetTrustedDevicesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get trusted devices
+ */
+
+export function useGetTrustedDevices<TData = Awaited<ReturnType<typeof getTrustedDevices>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTrustedDevices>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetTrustedDevicesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getRemoveDeviceUrl = (id: number,) => {
+
+
+
+
+  return `/api/security/devices/${id}/remove`
+}
+
+/**
+ * @summary Remove a trusted device
+ */
+export const removeDevice = async (id: number, options?: RequestInit): Promise<SuccessMessage> => {
+
+  return customFetch<SuccessMessage>(getRemoveDeviceUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getRemoveDeviceMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeDevice>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof removeDevice>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['removeDevice'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeDevice>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  removeDevice(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveDeviceMutationResult = NonNullable<Awaited<ReturnType<typeof removeDevice>>>
+
+    export type RemoveDeviceMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Remove a trusted device
+ */
+export const useRemoveDevice = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeDevice>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof removeDevice>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getRemoveDeviceMutationOptions(options));
+    }
+
+export const getGetLiveFeedUrl = (params?: GetLiveFeedParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/live-feed?${stringifiedParams}` : `/api/live-feed`
+}
+
+/**
+ * @summary Get latest transactions for live feed
+ */
+export const getLiveFeed = async (params?: GetLiveFeedParams, options?: RequestInit): Promise<LiveFeedResponse> => {
+
+  return customFetch<LiveFeedResponse>(getGetLiveFeedUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLiveFeedQueryKey = (params?: GetLiveFeedParams,) => {
+    return [
+    `/api/live-feed`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetLiveFeedQueryOptions = <TData = Awaited<ReturnType<typeof getLiveFeed>>, TError = ErrorType<unknown>>(params?: GetLiveFeedParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLiveFeed>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLiveFeedQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLiveFeed>>> = ({ signal }) => getLiveFeed(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLiveFeed>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLiveFeedQueryResult = NonNullable<Awaited<ReturnType<typeof getLiveFeed>>>
+export type GetLiveFeedQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get latest transactions for live feed
+ */
+
+export function useGetLiveFeed<TData = Awaited<ReturnType<typeof getLiveFeed>>, TError = ErrorType<unknown>>(
+ params?: GetLiveFeedParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLiveFeed>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLiveFeedQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetCommandCenterStatsUrl = () => {
+
+
+
+
+  return `/api/command-center/stats`
+}
+
+/**
+ * @summary Command center live stats
+ */
+export const getCommandCenterStats = async ( options?: RequestInit): Promise<CommandCenterStats> => {
+
+  return customFetch<CommandCenterStats>(getGetCommandCenterStatsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCommandCenterStatsQueryKey = () => {
+    return [
+    `/api/command-center/stats`
+    ] as const;
+    }
+
+
+export const getGetCommandCenterStatsQueryOptions = <TData = Awaited<ReturnType<typeof getCommandCenterStats>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCommandCenterStats>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCommandCenterStatsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommandCenterStats>>> = ({ signal }) => getCommandCenterStats({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCommandCenterStats>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCommandCenterStatsQueryResult = NonNullable<Awaited<ReturnType<typeof getCommandCenterStats>>>
+export type GetCommandCenterStatsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Command center live stats
+ */
+
+export function useGetCommandCenterStats<TData = Awaited<ReturnType<typeof getCommandCenterStats>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCommandCenterStats>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCommandCenterStatsQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

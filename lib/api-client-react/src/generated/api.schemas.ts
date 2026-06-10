@@ -275,6 +275,93 @@ export interface FraudLogListResponse {
   limit: number;
 }
 
+export interface VirtualCard {
+  id: number;
+  userId: number;
+  cardNumber: string;
+  last4: string;
+  brand: string;
+  cvv: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isActive: boolean;
+  usageLimit: number;
+  timesUsed: number;
+  /** @nullable */
+  note?: string | null;
+  createdAt: string;
+  /** @nullable */
+  expiresAt?: string | null;
+}
+
+export interface GenerateVirtualCardInput {
+  usageLimit?: number;
+  note?: string;
+  validHours?: number;
+}
+
+export interface LoginEvent {
+  id: number;
+  userId: number;
+  /** @nullable */
+  ipAddress?: string | null;
+  /** @nullable */
+  userAgent?: string | null;
+  /** @nullable */
+  deviceFingerprint?: string | null;
+  /** @nullable */
+  deviceName?: string | null;
+  /** @nullable */
+  location?: string | null;
+  isTrusted?: boolean;
+  loginAt: string;
+}
+
+export interface TrustedDevice {
+  id: number;
+  deviceName: string;
+  deviceFingerprint: string;
+  /** @nullable */
+  location?: string | null;
+  loginAt: string;
+  isTrusted: boolean;
+}
+
+export interface SuccessMessage {
+  message: string;
+}
+
+export interface LiveFeedEvent {
+  id: number;
+  type: string;
+  amount: number;
+  merchant: string;
+  merchantCategory?: string;
+  riskLevel: string;
+  riskScore?: number;
+  fraudProbability?: number;
+  status: string;
+  /** @nullable */
+  cardLast4?: string | null;
+  /** @nullable */
+  location?: string | null;
+  createdAt: string;
+}
+
+export interface LiveFeedResponse {
+  events: LiveFeedEvent[];
+  serverTime: string;
+}
+
+export interface CommandCenterStats {
+  fraudLast24h: number;
+  blockedCards: number;
+  activeAlerts: number;
+  totalToday: number;
+  threatLevel: string;
+  autoBlocked: number;
+}
+
 export type ListTransactionsParams = {
 page?: number;
 limit?: number;
@@ -317,6 +404,18 @@ search?: string;
 
 export type ListFraudLogsParams = {
 page?: number;
+limit?: number;
+};
+
+export type GetLoginHistoryParams = {
+limit?: number;
+};
+
+export type GetLiveFeedParams = {
+/**
+ * ISO timestamp — return events after this time
+ */
+since?: string;
 limit?: number;
 };
 

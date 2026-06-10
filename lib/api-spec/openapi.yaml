@@ -471,6 +471,167 @@ paths:
               schema:
                 $ref: "#/components/schemas/FraudLogListResponse"
 
+  /virtual-cards:
+    get:
+      operationId: listVirtualCards
+      tags: [cards]
+      summary: List user's virtual cards
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Virtual cards list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VirtualCard"
+
+  /virtual-cards/generate:
+    post:
+      operationId: generateVirtualCard
+      tags: [cards]
+      summary: Generate a virtual credit card
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateVirtualCardInput"
+      responses:
+        "201":
+          description: Virtual card generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualCard"
+
+  /virtual-cards/{id}/deactivate:
+    patch:
+      operationId: deactivateVirtualCard
+      tags: [cards]
+      summary: Deactivate a virtual card
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deactivated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualCard"
+
+  /security/login-history:
+    get:
+      operationId: getLoginHistory
+      tags: [auth]
+      summary: Get login history for current user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Login history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LoginEvent"
+
+  /security/devices:
+    get:
+      operationId: getTrustedDevices
+      tags: [auth]
+      summary: Get trusted devices
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Device list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrustedDevice"
+
+  /security/devices/{id}/remove:
+    delete:
+      operationId: removeDevice
+      tags: [auth]
+      summary: Remove a trusted device
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+
+  /live-feed:
+    get:
+      operationId: getLiveFeed
+      tags: [transactions]
+      summary: Get latest transactions for live feed
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: since
+          in: query
+          schema:
+            type: string
+            description: ISO timestamp — return events after this time
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Live feed events
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LiveFeedResponse"
+
+  /command-center/stats:
+    get:
+      operationId: getCommandCenterStats
+      tags: [dashboard]
+      summary: Command center live stats
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Command center stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommandCenterStats"
+
 components:
   schemas:
     HealthStatus:
@@ -815,4 +976,153 @@ components:
         page:
           type: integer
         limit:
+          type: integer
+
+    VirtualCard:
+      type: object
+      required: [id, userId, cardNumber, last4, brand, cvv, expiryMonth, expiryYear, isActive, usageLimit, timesUsed, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        cardNumber:
+          type: string
+        last4:
+          type: string
+        brand:
+          type: string
+        cvv:
+          type: string
+        expiryMonth:
+          type: integer
+        expiryYear:
+          type: integer
+        isActive:
+          type: boolean
+        usageLimit:
+          type: integer
+        timesUsed:
+          type: integer
+        note:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        expiresAt:
+          type: ["string", "null"]
+
+    GenerateVirtualCardInput:
+      type: object
+      properties:
+        usageLimit:
+          type: integer
+          default: 1
+        note:
+          type: string
+        validHours:
+          type: integer
+          default: 24
+
+    LoginEvent:
+      type: object
+      required: [id, userId, loginAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        ipAddress:
+          type: ["string", "null"]
+        userAgent:
+          type: ["string", "null"]
+        deviceFingerprint:
+          type: ["string", "null"]
+        deviceName:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        isTrusted:
+          type: boolean
+        loginAt:
+          type: string
+
+    TrustedDevice:
+      type: object
+      required: [id, deviceName, deviceFingerprint, loginAt, isTrusted]
+      properties:
+        id:
+          type: integer
+        deviceName:
+          type: string
+        deviceFingerprint:
+          type: string
+        location:
+          type: ["string", "null"]
+        loginAt:
+          type: string
+        isTrusted:
+          type: boolean
+
+    SuccessMessage:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+    LiveFeedEvent:
+      type: object
+      required: [id, type, amount, merchant, riskLevel, status, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        amount:
+          type: number
+        merchant:
+          type: string
+        merchantCategory:
+          type: string
+        riskLevel:
+          type: string
+        riskScore:
+          type: number
+        fraudProbability:
+          type: number
+        status:
+          type: string
+        cardLast4:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    LiveFeedResponse:
+      type: object
+      required: [events, serverTime]
+      properties:
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/LiveFeedEvent"
+        serverTime:
+          type: string
+
+    CommandCenterStats:
+      type: object
+      required: [fraudLast24h, blockedCards, activeAlerts, totalToday, threatLevel, autoBlocked]
+      properties:
+        fraudLast24h:
+          type: integer
+        blockedCards:
+          type: integer
+        activeAlerts:
+          type: integer
+        totalToday:
+          type: integer
+        threatLevel:
+          type: string
+        autoBlocked:
           type: integer
