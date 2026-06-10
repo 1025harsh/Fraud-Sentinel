@@ -1,0 +1,168 @@
+Project Title: AI-Powered Credit Card Fraud Detection System
+
+Build a full-stack Credit Card Fraud Detection web application with modern UI and Machine Learning integration.
+
+Technology Stack:
+
+* Frontend: HTML, CSS, JavaScript, Bootstrap
+* Backend: Python Flask/FastAPI
+* Database: MySQL
+* Machine Learning: Scikit-learn, XGBoost
+* Authentication: JWT, OAuth
+* Notifications: Email SMTP, Twilio SMS
+* Charts: Chart.js
+* Real-time Monitoring: WebSockets
+
+Features Required:
+
+1. Authentication & Login Module
+
+* Secure login page
+* User registration
+* JWT authentication
+* CAPTCHA protection
+* Forgot password via email
+* Multi-factor authentication
+* Biometric login simulation (Fingerprint/Face ID)
+* Session management
+
+2. AI Fraud Detection Engine
+
+* Train ML model on credit card transaction data
+* Fraud probability prediction
+* Behavioral analysis
+* Anomaly detection
+* Real-time risk scoring
+* Confidence score generation
+* Fraud classification dashboard
+
+3. Real-Time Transaction Monitoring
+
+* Live transaction stream
+* Transaction approval/rejection
+* Risk score display
+* Suspicious transaction highlighting
+* Auto-block high-risk transactions
+* WebSocket-based live updates
+
+4. User Dashboard
+
+* Attractive dashboard UI
+* User profile management
+* Account settings
+* Transaction history
+* Download reports in PDF and Excel
+* Card management dashboard
+* Security settings page
+* Fraud alert history
+
+5. Admin Dashboard
+
+* Fraud monitoring dashboard
+* User management
+* Live transaction tracking
+* System analytics
+* Fraud statistics charts
+* Block/unblock cards
+* Risk heatmap
+* Fraud trend analysis
+
+6. Notification System
+
+* Email notifications for every transaction
+* SMS alerts for suspicious transactions
+* Login alert emails
+* Password reset notifications
+* Fraud detection alerts
+* Account activity notifications
+
+7. Security Features
+
+* End-to-end encryption
+* HTTPS support
+* Secure API authentication
+* SQL injection prevention
+* XSS protection
+* CSRF protection
+* Rate limiting
+* Password hashing using bcrypt
+
+8. Database Tables
+   Users
+   Cards
+   Transactions
+   Fraud_Logs
+   Notifications
+   Login_History
+   Risk_Scores
+   Admin_Logs
+
+9. Machine Learning Features
+
+* Data preprocessing pipeline
+* Feature engineering
+* Model training
+* Model evaluation
+* Real-time prediction API
+* Risk score calculation
+* Fraud probability visualization
+
+10. Reports & Analytics
+
+* Daily transaction reports
+* Fraud reports
+* Monthly analytics
+* PDF export
+* Excel export
+* Interactive charts
+
+Project Structure:
+
+credit-card-fraud-detection/
+│
+├── frontend/
+│   ├── index.html
+│   ├── register.html
+│   ├── dashboard.html
+│   ├── transactions.html
+│   ├── profile.html
+│   ├── admin.html
+│   ├── css/
+│   ├── js/
+│   └── assets/
+│
+├── backend/
+│   ├── app.py
+│   ├── routes/
+│   ├── models/
+│   ├── services/
+│   ├── fraud_detection/
+│   ├── notifications/
+│   └── security/
+│
+├── ml_model/
+│   ├── train_model.py
+│   ├── predict.py
+│   └── model.pkl
+│
+├── database/
+│   ├── schema.sql
+│   └── seed_data.sql
+│
+└── README.md
+
+Create complete source code with:
+
+* Responsive modern UI
+* Professional dashboard
+* Working ML model
+* Database integration
+* Email notification system
+* SMS alert system
+* Secure authentication
+* API documentation
+* Installation guide
+* Sample transaction dataset
+* Test cases
+
+The application should look like a real banking fraud detection platform used by financial institutions.

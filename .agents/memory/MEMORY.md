@@ -1,0 +1,3 @@
+- [Express req.auth typing](express-req-auth.md) — use `global namespace Express` in a `.d.ts` file + `"types": ["node","express"]` in tsconfig
+- [Tailwind v4 dark mode](tailwind-v4-dark.md) — never use `dark` as a utility in `@apply`; add `dark` class to `<html>` in main.tsx instead
+- [FraudGuard seeded passwords](fraudguard-seed.md) — bcrypt hash for "password" used in demo seed data

@@ -1,22 +1,35 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Credit Card Fraud Detection API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: transactions
+    description: Transaction management
+  - name: cards
+    description: Card management
+  - name: users
+    description: User management
+  - name: alerts
+    description: Fraud alerts and notifications
+  - name: dashboard
+    description: Dashboard statistics
+  - name: admin
+    description: Admin operations
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +37,440 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Log in with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "409":
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Log out current session
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /transactions:
+    get:
+      operationId: listTransactions
+      tags: [transactions]
+      summary: List transactions
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: status
+          in: query
+          schema: { type: string, enum: [approved, declined, flagged, pending] }
+        - name: riskLevel
+          in: query
+          schema: { type: string, enum: [low, medium, high, critical] }
+        - name: cardId
+          in: query
+          schema: { type: integer }
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Transaction list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionListResponse"
+
+    post:
+      operationId: createTransaction
+      tags: [transactions]
+      summary: Submit a new transaction for fraud analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionInput"
+      responses:
+        "201":
+          description: Transaction analyzed and created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /transactions/{id}:
+    get:
+      operationId: getTransaction
+      tags: [transactions]
+      summary: Get transaction detail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Transaction detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /transactions/{id}/review:
+    patch:
+      operationId: reviewTransaction
+      tags: [transactions]
+      summary: Approve or decline a flagged transaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionReview"
+      responses:
+        "200":
+          description: Transaction updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /cards:
+    get:
+      operationId: listCards
+      tags: [cards]
+      summary: List cards for the authenticated user
+      responses:
+        "200":
+          description: Card list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Card"
+
+    post:
+      operationId: createCard
+      tags: [cards]
+      summary: Add a new card
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CardInput"
+      responses:
+        "201":
+          description: Card created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Card"
+
+  /cards/{id}:
+    get:
+      operationId: getCard
+      tags: [cards]
+      summary: Get card details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Card detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Card"
+
+  /cards/{id}/block:
+    patch:
+      operationId: blockCard
+      tags: [cards]
+      summary: Block or unblock a card
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CardBlockInput"
+      responses:
+        "200":
+          description: Card status updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Card"
+
+  /alerts:
+    get:
+      operationId: listAlerts
+      tags: [alerts]
+      summary: List fraud alerts for the current user
+      parameters:
+        - name: unreadOnly
+          in: query
+          schema: { type: boolean }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        "200":
+          description: Alert list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Alert"
+
+  /alerts/{id}/read:
+    patch:
+      operationId: markAlertRead
+      tags: [alerts]
+      summary: Mark an alert as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Alert marked read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Alert"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get high-level dashboard metrics
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/fraud-trend:
+    get:
+      operationId: getFraudTrend
+      tags: [dashboard]
+      summary: Get daily fraud trend data for the last 30 days
+      responses:
+        "200":
+          description: Fraud trend data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FraudTrendPoint"
+
+  /dashboard/risk-breakdown:
+    get:
+      operationId: getRiskBreakdown
+      tags: [dashboard]
+      summary: Get transaction count by risk level
+      responses:
+        "200":
+          description: Risk breakdown
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RiskBreakdownItem"
+
+  /dashboard/recent-fraud:
+    get:
+      operationId: getRecentFraud
+      tags: [dashboard]
+      summary: Get recent high-risk transactions
+      responses:
+        "200":
+          description: Recent fraud events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+
+  /admin/users:
+    get:
+      operationId: adminListUsers
+      tags: [admin]
+      summary: Admin — list all users
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: User list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResponse"
+
+  /admin/users/{id}:
+    patch:
+      operationId: adminUpdateUser
+      tags: [admin]
+      summary: Admin — update user (role, status)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminUserUpdate"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /admin/stats:
+    get:
+      operationId: getAdminStats
+      tags: [admin]
+      summary: Admin — system-wide statistics
+      responses:
+        "200":
+          description: Admin stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  /admin/fraud-logs:
+    get:
+      operationId: listFraudLogs
+      tags: [admin]
+      summary: Admin — list fraud detection events
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        "200":
+          description: Fraud log list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FraudLogListResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +478,341 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    RegisterInput:
+      type: object
+      required: [email, password, name]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+
+    User:
+      type: object
+      required: [id, email, name, role, status, createdAt]
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [user, admin]
+        status:
+          type: string
+          enum: [active, suspended]
+        createdAt:
+          type: string
+
+    Transaction:
+      type: object
+      required: [id, amount, merchant, merchantCategory, cardId, status, riskScore, riskLevel, fraudProbability, createdAt]
+      properties:
+        id:
+          type: integer
+        amount:
+          type: number
+        merchant:
+          type: string
+        merchantCategory:
+          type: string
+        cardId:
+          type: integer
+        cardLast4:
+          type: string
+        userId:
+          type: integer
+        status:
+          type: string
+          enum: [approved, declined, flagged, pending]
+        riskScore:
+          type: number
+        riskLevel:
+          type: string
+          enum: [low, medium, high, critical]
+        fraudProbability:
+          type: number
+        location:
+          type: string
+        ipAddress:
+          type: string
+        deviceId:
+          type: string
+        reviewNote:
+          type: ["string", "null"]
+        reviewedBy:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+
+    TransactionInput:
+      type: object
+      required: [amount, merchant, merchantCategory, cardId]
+      properties:
+        amount:
+          type: number
+        merchant:
+          type: string
+        merchantCategory:
+          type: string
+        cardId:
+          type: integer
+        location:
+          type: string
+        ipAddress:
+          type: string
+        deviceId:
+          type: string
+
+    TransactionReview:
+      type: object
+      required: [decision]
+      properties:
+        decision:
+          type: string
+          enum: [approved, declined]
+        note:
+          type: string
+
+    TransactionListResponse:
+      type: object
+      required: [transactions, total, page, limit]
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    Card:
+      type: object
+      required: [id, userId, last4, brand, expiryMonth, expiryYear, isBlocked, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        last4:
+          type: string
+        brand:
+          type: string
+          enum: [visa, mastercard, amex, discover]
+        expiryMonth:
+          type: integer
+        expiryYear:
+          type: integer
+        isBlocked:
+          type: boolean
+        blockReason:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    CardInput:
+      type: object
+      required: [last4, brand, expiryMonth, expiryYear]
+      properties:
+        last4:
+          type: string
+        brand:
+          type: string
+          enum: [visa, mastercard, amex, discover]
+        expiryMonth:
+          type: integer
+        expiryYear:
+          type: integer
+
+    CardBlockInput:
+      type: object
+      required: [blocked]
+      properties:
+        blocked:
+          type: boolean
+        reason:
+          type: string
+
+    Alert:
+      type: object
+      required: [id, userId, type, message, isRead, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        type:
+          type: string
+          enum: [fraud_detected, high_risk, card_blocked, login_alert, system]
+        message:
+          type: string
+        transactionId:
+          type: ["integer", "null"]
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+
+    DashboardSummary:
+      type: object
+      required: [totalTransactions, totalFlagged, totalDeclined, fraudRate, totalAmount, blockedCards, activeAlerts, avgRiskScore]
+      properties:
+        totalTransactions:
+          type: integer
+        totalFlagged:
+          type: integer
+        totalDeclined:
+          type: integer
+        fraudRate:
+          type: number
+        totalAmount:
+          type: number
+        blockedCards:
+          type: integer
+        activeAlerts:
+          type: integer
+        avgRiskScore:
+          type: number
+
+    FraudTrendPoint:
+      type: object
+      required: [date, total, flagged, approved]
+      properties:
+        date:
+          type: string
+        total:
+          type: integer
+        flagged:
+          type: integer
+        approved:
+          type: integer
+
+    RiskBreakdownItem:
+      type: object
+      required: [level, count, percentage]
+      properties:
+        level:
+          type: string
+        count:
+          type: integer
+        percentage:
+          type: number
+
+    UserListResponse:
+      type: object
+      required: [users, total, page, limit]
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    AdminUserUpdate:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, admin]
+        status:
+          type: string
+          enum: [active, suspended]
+
+    AdminStats:
+      type: object
+      required: [totalUsers, totalCards, totalTransactions, fraudDetectedToday, systemUptime, mlModelAccuracy]
+      properties:
+        totalUsers:
+          type: integer
+        totalCards:
+          type: integer
+        totalTransactions:
+          type: integer
+        fraudDetectedToday:
+          type: integer
+        systemUptime:
+          type: string
+        mlModelAccuracy:
+          type: number
+
+    FraudLog:
+      type: object
+      required: [id, transactionId, riskScore, riskLevel, fraudProbability, signals, createdAt]
+      properties:
+        id:
+          type: integer
+        transactionId:
+          type: integer
+        riskScore:
+          type: number
+        riskLevel:
+          type: string
+        fraudProbability:
+          type: number
+        signals:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+
+    FraudLogListResponse:
+      type: object
+      required: [logs, total, page, limit]
+      properties:
+        logs:
+          type: array
+          items:
+            $ref: "#/components/schemas/FraudLog"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
