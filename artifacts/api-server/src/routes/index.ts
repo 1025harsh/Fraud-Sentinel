@@ -9,6 +9,9 @@ import adminRouter from "./admin";
 import virtualCardsRouter from "./virtual_cards";
 import securityRouter from "./security";
 import liveFeedRouter from "./live_feed";
+import fraudCasesRouter from "./fraud_cases";
+import notificationsRouter from "./notifications_route";
+import auditRouter from "./audit_route";
 
 const router: IRouter = Router();
 
@@ -22,5 +25,8 @@ router.use(adminRouter);
 router.use(virtualCardsRouter);
 router.use(securityRouter);
 router.use(liveFeedRouter);
+router.use(fraudCasesRouter);
+router.use(notificationsRouter);
+router.use(auditRouter);
 
 export default router;

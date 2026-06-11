@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { db, transactionsTable, cardsTable, alertsTable, fraudLogsTable } from "@workspace/db";
-import { eq, and, desc, ilike, or, sql, count } from "drizzle-orm";
+import { db, transactionsTable, cardsTable, alertsTable, fraudLogsTable, usersTable, fraudCasesTable } from "@workspace/db";
+import { eq, and, desc, ilike, or, count } from "drizzle-orm";
 import {
   ListTransactionsQueryParams,
   CreateTransactionBody,
@@ -10,6 +10,10 @@ import {
 } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/auth";
 import { analyzeFraud } from "../lib/fraud-engine";
+import { sendFraudAlert } from "../lib/email";
+import { auditLog } from "../lib/audit";
+import { createNotification } from "../lib/notifications";
+import { broadcast } from "../lib/websocket";
 
 const router: IRouter = Router();
 
@@ -20,15 +24,15 @@ function txToJson(tx: typeof transactionsTable.$inferSelect) {
     merchant: tx.merchant,
     merchantCategory: tx.merchantCategory,
     cardId: tx.cardId,
-    cardLast4: tx.cardLast4 ?? undefined,
+    cardLast4: tx.cardLast4 ?? null,
     userId: tx.userId,
     status: tx.status,
     riskScore: tx.riskScore,
     riskLevel: tx.riskLevel,
     fraudProbability: tx.fraudProbability,
-    location: tx.location ?? undefined,
-    ipAddress: tx.ipAddress ?? undefined,
-    deviceId: tx.deviceId ?? undefined,
+    location: tx.location ?? null,
+    ipAddress: tx.ipAddress ?? null,
+    deviceId: tx.deviceId ?? null,
     reviewNote: tx.reviewNote ?? null,
     reviewedBy: tx.reviewedBy ?? null,
     createdAt: tx.createdAt.toISOString(),
@@ -70,10 +74,7 @@ router.get("/transactions", requireAuth, async (req, res): Promise<void> => {
       .orderBy(desc(transactionsTable.createdAt))
       .limit(limit ?? 20)
       .offset(offset),
-    db
-      .select({ total: count() })
-      .from(transactionsTable)
-      .where(whereClause),
+    db.select({ total: count() }).from(transactionsTable).where(whereClause),
   ]);
 
   res.json({
@@ -92,7 +93,6 @@ router.post("/transactions", requireAuth, async (req, res): Promise<void> => {
   }
   const data = parsed.data;
 
-  // Verify card belongs to user
   const [card] = await db
     .select()
     .from(cardsTable)
@@ -106,7 +106,6 @@ router.post("/transactions", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  // Run fraud analysis
   const analysis = analyzeFraud({
     amount: data.amount,
     merchant: data.merchant,
@@ -116,11 +115,10 @@ router.post("/transactions", requireAuth, async (req, res): Promise<void> => {
     deviceId: data.deviceId,
   });
 
-  // Determine status based on risk
   let status: string;
-  if (analysis.riskLevel === "critical") {
+  if (analysis.riskScore >= 81) {
     status = "declined";
-  } else if (analysis.riskLevel === "high") {
+  } else if (analysis.riskScore >= 61) {
     status = "flagged";
   } else {
     status = "approved";
@@ -145,7 +143,6 @@ router.post("/transactions", requireAuth, async (req, res): Promise<void> => {
     })
     .returning();
 
-  // Log fraud analysis
   await db.insert(fraudLogsTable).values({
     transactionId: tx.id,
     riskScore: analysis.riskScore,
@@ -154,17 +151,76 @@ router.post("/transactions", requireAuth, async (req, res): Promise<void> => {
     signals: analysis.signals,
   });
 
-  // Create alert for high/critical risk
-  if (analysis.riskLevel === "high" || analysis.riskLevel === "critical") {
-    const alertType = analysis.riskLevel === "critical" ? "fraud_detected" : "high_risk";
+  // Broadcast via WebSocket
+  broadcast(
+    {
+      type: "transaction",
+      payload: { ...txToJson(tx), signals: analysis.signals },
+      timestamp: new Date().toISOString(),
+    },
+    req.auth!.userId
+  );
+
+  // High/critical: create alert, notification, fraud case, email
+  if (analysis.riskScore >= 61) {
+    const alertType = analysis.riskScore >= 81 ? "fraud_detected" : "high_risk";
     await db.insert(alertsTable).values({
       userId: req.auth!.userId,
       type: alertType,
-      message: `${analysis.riskLevel === "critical" ? "Fraud detected" : "High-risk transaction"}: $${data.amount.toFixed(2)} at ${data.merchant}`,
+      message: `${status === "declined" ? "FRAUD DETECTED" : "High-risk transaction"}: $${data.amount.toFixed(2)} at ${data.merchant}`,
       transactionId: tx.id,
       isRead: false,
     });
+
+    // Create fraud case for critical
+    if (analysis.riskScore >= 81) {
+      const caseNumber = `FG-${Date.now().toString(36).toUpperCase()}`;
+      await db.insert(fraudCasesTable).values({
+        caseNumber,
+        userId: req.auth!.userId,
+        transactionId: tx.id,
+        status: "open",
+        priority: "high",
+        title: `Fraud Detected: $${data.amount.toFixed(2)} at ${data.merchant}`,
+        description: `Automated fraud case. Risk score: ${analysis.riskScore}. Signals: ${analysis.signals.join("; ")}`,
+        riskScore: String(analysis.riskScore),
+        amountInvolved: String(data.amount),
+      });
+
+      // Auto-block card on critical
+      await db
+        .update(cardsTable)
+        .set({ isBlocked: true, blockReason: `Auto-blocked: Fraud detected on transaction #${tx.id}` })
+        .where(eq(cardsTable.id, data.cardId));
+    }
+
+    // In-app notification
+    void createNotification({
+      userId: req.auth!.userId,
+      type: alertType,
+      title: status === "declined" ? "Fraud Detected — Card Blocked" : "High-Risk Transaction Flagged",
+      message: `$${data.amount.toFixed(2)} at ${data.merchant} — Risk Score: ${analysis.riskScore}/100`,
+      metadata: { transactionId: tx.id, riskScore: analysis.riskScore },
+    });
+
+    // Email alert (fire-and-forget)
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, req.auth!.userId));
+    if (user) {
+      void sendFraudAlert({
+        userName: user.name,
+        userEmail: user.email,
+        amount: data.amount,
+        merchant: data.merchant,
+        riskScore: analysis.riskScore,
+        riskLevel: analysis.riskLevel,
+        signals: analysis.signals,
+        transactionId: tx.id,
+        cardLast4: card.last4,
+      });
+    }
   }
+
+  await auditLog({ req, action: "transaction_created", resource: "transaction", resourceId: tx.id });
 
   res.status(201).json(txToJson(tx));
 });
@@ -172,53 +228,41 @@ router.post("/transactions", requireAuth, async (req, res): Promise<void> => {
 router.get("/transactions/:id", requireAuth, async (req, res): Promise<void> => {
   const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = GetTransactionParams.safeParse({ id: parseInt(rawId, 10) });
-  if (!params.success) {
-    res.status(400).json({ error: params.error.message });
-    return;
-  }
+  if (!params.success) { res.status(400).json({ error: params.error.message }); return; }
 
   const conditions = [eq(transactionsTable.id, params.data.id)];
-  if (req.auth!.role !== "admin") {
-    conditions.push(eq(transactionsTable.userId, req.auth!.userId));
-  }
+  if (req.auth!.role !== "admin") conditions.push(eq(transactionsTable.userId, req.auth!.userId));
 
   const [tx] = await db.select().from(transactionsTable).where(and(...conditions));
-  if (!tx) {
-    res.status(404).json({ error: "Transaction not found" });
-    return;
-  }
-  res.json(txToJson(tx));
+  if (!tx) { res.status(404).json({ error: "Transaction not found" }); return; }
+
+  // Fetch signals from fraud log
+  const [log] = await db
+    .select()
+    .from(fraudLogsTable)
+    .where(eq(fraudLogsTable.transactionId, tx.id))
+    .limit(1);
+
+  res.json({ ...txToJson(tx), signals: log?.signals ?? [] });
 });
 
 router.patch("/transactions/:id/review", requireAuth, async (req, res): Promise<void> => {
   const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = ReviewTransactionParams.safeParse({ id: parseInt(rawId, 10) });
-  if (!params.success) {
-    res.status(400).json({ error: params.error.message });
-    return;
-  }
+  if (!params.success) { res.status(400).json({ error: params.error.message }); return; }
   const body = ReviewTransactionBody.safeParse(req.body);
-  if (!body.success) {
-    res.status(400).json({ error: body.error.message });
-    return;
-  }
+  if (!body.success) { res.status(400).json({ error: body.error.message }); return; }
 
   const [tx] = await db.select().from(transactionsTable).where(eq(transactionsTable.id, params.data.id));
-  if (!tx) {
-    res.status(404).json({ error: "Transaction not found" });
-    return;
-  }
+  if (!tx) { res.status(404).json({ error: "Transaction not found" }); return; }
 
   const [updated] = await db
     .update(transactionsTable)
-    .set({
-      status: body.data.decision,
-      reviewNote: body.data.note ?? null,
-      reviewedBy: req.auth!.userId,
-    })
+    .set({ status: body.data.decision, reviewNote: body.data.note ?? null, reviewedBy: req.auth!.userId })
     .where(eq(transactionsTable.id, params.data.id))
     .returning();
 
+  await auditLog({ req, action: "transaction_reviewed", resource: "transaction", resourceId: tx.id, details: body.data.decision });
   res.json(txToJson(updated));
 });
 

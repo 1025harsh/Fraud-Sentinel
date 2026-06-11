@@ -632,6 +632,229 @@ paths:
               schema:
                 $ref: "#/components/schemas/CommandCenterStats"
 
+
+  /fraud-cases:
+    get:
+      operationId: listFraudCases
+      tags: [admin]
+      summary: List fraud cases
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Fraud cases
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FraudCaseListResponse"
+
+  /fraud-cases/{id}:
+    get:
+      operationId: getFraudCase
+      tags: [admin]
+      summary: Get fraud case
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Fraud case
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FraudCase"
+    patch:
+      operationId: updateFraudCase
+      tags: [admin]
+      summary: Update fraud case
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                priority:
+                  type: string
+                resolution:
+                  type: string
+                assignedTo:
+                  type: integer
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FraudCase"
+
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [alerts]
+      summary: List notifications
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: unread
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationListResponse"
+
+  /notifications/{id}/read:
+    patch:
+      operationId: markNotificationRead
+      tags: [alerts]
+      summary: Mark notification as read
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Marked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+
+  /notifications/read-all:
+    patch:
+      operationId: markAllNotificationsRead
+      tags: [alerts]
+      summary: Mark all notifications as read
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: All marked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+
+  /audit-logs:
+    get:
+      operationId: listAuditLogs
+      tags: [admin]
+      summary: List audit logs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: Audit logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLogListResponse"
+
+  /auth/forgot-password:
+    post:
+      operationId: forgotPassword
+      tags: [auth]
+      summary: Request password reset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+      responses:
+        "200":
+          description: Reset email sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+
+  /auth/reset-password:
+    post:
+      operationId: resetPassword
+      tags: [auth]
+      summary: Reset password with token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, token, newPassword]
+              properties:
+                email:
+                  type: string
+                token:
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        "200":
+          description: Password reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+
 components:
   schemas:
     HealthStatus:
@@ -1126,3 +1349,132 @@ components:
           type: string
         autoBlocked:
           type: integer
+    FraudCase:
+      type: object
+      required: [id, caseNumber, userId, status, priority, title, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        caseNumber:
+          type: string
+        userId:
+          type: integer
+        transactionId:
+          type: ["integer", "null"]
+        assignedTo:
+          type: ["integer", "null"]
+        status:
+          type: string
+        priority:
+          type: string
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        resolution:
+          type: ["string", "null"]
+        riskScore:
+          type: ["number", "null"]
+        amountInvolved:
+          type: ["number", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        closedAt:
+          type: ["string", "null"]
+
+    FraudCaseListResponse:
+      type: object
+      required: [cases, total, page, limit]
+      properties:
+        cases:
+          type: array
+          items:
+            $ref: "#/components/schemas/FraudCase"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+
+    Notification:
+      type: object
+      required: [id, userId, type, title, message, isRead, emailSent, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        type:
+          type: string
+        title:
+          type: string
+        message:
+          type: string
+        isRead:
+          type: boolean
+        emailSent:
+          type: boolean
+        metadata:
+          type: object
+          nullable: true
+        createdAt:
+          type: string
+
+    NotificationListResponse:
+      type: object
+      required: [notifications, total, unread]
+      properties:
+        notifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/Notification"
+        total:
+          type: integer
+        unread:
+          type: integer
+
+    AuditLog:
+      type: object
+      required: [id, action, resource, status, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: ["integer", "null"]
+        action:
+          type: string
+        resource:
+          type: string
+        resourceId:
+          type: ["string", "null"]
+        details:
+          type: ["string", "null"]
+        ipAddress:
+          type: ["string", "null"]
+        userAgent:
+          type: ["string", "null"]
+        status:
+          type: string
+        createdAt:
+          type: string
+
+    AuditLogListResponse:
+      type: object
+      required: [logs, total, page, limit]
+      properties:
+        logs:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditLog"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+

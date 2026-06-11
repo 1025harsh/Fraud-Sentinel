@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "wouter";
 import {
   Shield, LayoutDashboard, ListOrdered, CreditCard, Bell,
-  ShieldAlert, LogOut, Zap, Cpu, Lock,
+  ShieldAlert, LogOut, Zap, Cpu, Lock, BellRing, Briefcase, ClipboardList,
 } from "lucide-react";
 
 export function Sidebar() {
@@ -30,6 +30,14 @@ export function Sidebar() {
         </div>
 
         <div>
+          <div className="text-xs font-mono text-muted-foreground mb-2 uppercase tracking-wider">Fraud</div>
+          <nav className="flex flex-col gap-1">
+            <NavItem href="/fraud-cases" icon={<Briefcase size={18} />} label="Fraud Cases" active={location === "/fraud-cases"} />
+            <NavItem href="/notifications" icon={<BellRing size={18} />} label="Notifications" active={location === "/notifications"} />
+          </nav>
+        </div>
+
+        <div>
           <div className="text-xs font-mono text-muted-foreground mb-2 uppercase tracking-wider">Advanced</div>
           <nav className="flex flex-col gap-1">
             <NavItem href="/command-center" icon={<Cpu size={18} />} label="Command Center" active={location === "/command-center"} />
@@ -43,6 +51,7 @@ export function Sidebar() {
             <div className="text-xs font-mono text-muted-foreground mb-2 uppercase tracking-wider">Admin</div>
             <nav className="flex flex-col gap-1">
               <NavItem href="/admin" icon={<ShieldAlert size={18} />} label="Admin Panel" active={location === "/admin"} />
+              <NavItem href="/audit-logs" icon={<ClipboardList size={18} />} label="Audit Logs" active={location === "/audit-logs"} />
             </nav>
           </div>
         )}

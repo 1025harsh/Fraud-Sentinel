@@ -600,3 +600,203 @@ export const GetCommandCenterStatsResponse = zod.object({
 })
 
 
+/**
+ * @summary List fraud cases
+ */
+export const listFraudCasesQueryLimitDefault = 20;
+export const listFraudCasesQueryPageDefault = 1;
+
+export const ListFraudCasesQueryParams = zod.object({
+  "limit": zod.coerce.number().default(listFraudCasesQueryLimitDefault),
+  "page": zod.coerce.number().default(listFraudCasesQueryPageDefault),
+  "status": zod.coerce.string().optional()
+})
+
+export const ListFraudCasesResponse = zod.object({
+  "cases": zod.array(zod.object({
+  "id": zod.number(),
+  "caseNumber": zod.string(),
+  "userId": zod.number(),
+  "transactionId": zod.number().nullish(),
+  "assignedTo": zod.number().nullish(),
+  "status": zod.string(),
+  "priority": zod.string(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "resolution": zod.string().nullish(),
+  "riskScore": zod.number().nullish(),
+  "amountInvolved": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string(),
+  "closedAt": zod.string().nullish()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "limit": zod.number()
+})
+
+
+/**
+ * @summary Get fraud case
+ */
+export const GetFraudCaseParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetFraudCaseResponse = zod.object({
+  "id": zod.number(),
+  "caseNumber": zod.string(),
+  "userId": zod.number(),
+  "transactionId": zod.number().nullish(),
+  "assignedTo": zod.number().nullish(),
+  "status": zod.string(),
+  "priority": zod.string(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "resolution": zod.string().nullish(),
+  "riskScore": zod.number().nullish(),
+  "amountInvolved": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string(),
+  "closedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Update fraud case
+ */
+export const UpdateFraudCaseParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateFraudCaseBody = zod.object({
+  "status": zod.string().optional(),
+  "priority": zod.string().optional(),
+  "resolution": zod.string().optional(),
+  "assignedTo": zod.number().optional()
+})
+
+export const UpdateFraudCaseResponse = zod.object({
+  "id": zod.number(),
+  "caseNumber": zod.string(),
+  "userId": zod.number(),
+  "transactionId": zod.number().nullish(),
+  "assignedTo": zod.number().nullish(),
+  "status": zod.string(),
+  "priority": zod.string(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "resolution": zod.string().nullish(),
+  "riskScore": zod.number().nullish(),
+  "amountInvolved": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string(),
+  "closedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary List notifications
+ */
+export const listNotificationsQueryLimitDefault = 20;
+
+export const ListNotificationsQueryParams = zod.object({
+  "limit": zod.coerce.number().default(listNotificationsQueryLimitDefault),
+  "unread": zod.coerce.string().optional()
+})
+
+export const ListNotificationsResponse = zod.object({
+  "notifications": zod.array(zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "type": zod.string(),
+  "title": zod.string(),
+  "message": zod.string(),
+  "isRead": zod.boolean(),
+  "emailSent": zod.boolean(),
+  "metadata": zod.object({
+
+}).passthrough().nullish(),
+  "createdAt": zod.string()
+})),
+  "total": zod.number(),
+  "unread": zod.number()
+})
+
+
+/**
+ * @summary Mark notification as read
+ */
+export const MarkNotificationReadParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const MarkNotificationReadResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Mark all notifications as read
+ */
+export const MarkAllNotificationsReadResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary List audit logs
+ */
+export const listAuditLogsQueryLimitDefault = 50;
+export const listAuditLogsQueryPageDefault = 1;
+
+export const ListAuditLogsQueryParams = zod.object({
+  "limit": zod.coerce.number().default(listAuditLogsQueryLimitDefault),
+  "page": zod.coerce.number().default(listAuditLogsQueryPageDefault)
+})
+
+export const ListAuditLogsResponse = zod.object({
+  "logs": zod.array(zod.object({
+  "id": zod.number(),
+  "userId": zod.number().nullish(),
+  "action": zod.string(),
+  "resource": zod.string(),
+  "resourceId": zod.string().nullish(),
+  "details": zod.string().nullish(),
+  "ipAddress": zod.string().nullish(),
+  "userAgent": zod.string().nullish(),
+  "status": zod.string(),
+  "createdAt": zod.string()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "limit": zod.number()
+})
+
+
+/**
+ * @summary Request password reset
+ */
+export const ForgotPasswordBody = zod.object({
+  "email": zod.string()
+})
+
+export const ForgotPasswordResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Reset password with token
+ */
+export const ResetPasswordBody = zod.object({
+  "email": zod.string(),
+  "token": zod.string(),
+  "newPassword": zod.string()
+})
+
+export const ResetPasswordResponse = zod.object({
+  "message": zod.string()
+})
+
+

@@ -362,6 +362,83 @@ export interface CommandCenterStats {
   autoBlocked: number;
 }
 
+export interface FraudCase {
+  id: number;
+  caseNumber: string;
+  userId: number;
+  /** @nullable */
+  transactionId?: number | null;
+  /** @nullable */
+  assignedTo?: number | null;
+  status: string;
+  priority: string;
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  resolution?: string | null;
+  /** @nullable */
+  riskScore?: number | null;
+  /** @nullable */
+  amountInvolved?: number | null;
+  createdAt: string;
+  updatedAt: string;
+  /** @nullable */
+  closedAt?: string | null;
+}
+
+export interface FraudCaseListResponse {
+  cases: FraudCase[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export type NotificationMetadata = { [key: string]: unknown } | null;
+
+export interface Notification {
+  id: number;
+  userId: number;
+  type: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  emailSent: boolean;
+  metadata?: NotificationMetadata;
+  createdAt: string;
+}
+
+export interface NotificationListResponse {
+  notifications: Notification[];
+  total: number;
+  unread: number;
+}
+
+export interface AuditLog {
+  id: number;
+  /** @nullable */
+  userId?: number | null;
+  action: string;
+  resource: string;
+  /** @nullable */
+  resourceId?: string | null;
+  /** @nullable */
+  details?: string | null;
+  /** @nullable */
+  ipAddress?: string | null;
+  /** @nullable */
+  userAgent?: string | null;
+  status: string;
+  createdAt: string;
+}
+
+export interface AuditLogListResponse {
+  logs: AuditLog[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export type ListTransactionsParams = {
 page?: number;
 limit?: number;
@@ -417,5 +494,38 @@ export type GetLiveFeedParams = {
  */
 since?: string;
 limit?: number;
+};
+
+export type ListFraudCasesParams = {
+limit?: number;
+page?: number;
+status?: string;
+};
+
+export type UpdateFraudCaseBody = {
+  status?: string;
+  priority?: string;
+  resolution?: string;
+  assignedTo?: number;
+};
+
+export type ListNotificationsParams = {
+limit?: number;
+unread?: string;
+};
+
+export type ListAuditLogsParams = {
+limit?: number;
+page?: number;
+};
+
+export type ForgotPasswordBody = {
+  email: string;
+};
+
+export type ResetPasswordBody = {
+  email: string;
+  token: string;
+  newPassword: string;
 };
 

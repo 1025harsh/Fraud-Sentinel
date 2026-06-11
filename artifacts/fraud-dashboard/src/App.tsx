@@ -9,6 +9,7 @@ import { Sidebar } from "@/components/sidebar";
 
 import Login from "@/pages/login";
 import Register from "@/pages/register";
+import ForgotPassword from "@/pages/forgot-password";
 import Dashboard from "@/pages/dashboard";
 import Transactions from "@/pages/transactions";
 import TransactionDetail from "@/pages/transaction-detail";
@@ -18,6 +19,9 @@ import Admin from "@/pages/admin";
 import CommandCenter from "@/pages/command-center";
 import VirtualCards from "@/pages/virtual-cards";
 import Security from "@/pages/security";
+import Notifications from "@/pages/notifications";
+import FraudCases from "@/pages/fraud-cases";
+import AuditLogs from "@/pages/audit-logs";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -90,6 +94,10 @@ function AppRouter() {
       <Route path="/command-center" component={() => <ProtectedRoute component={CommandCenter} />} />
       <Route path="/virtual-cards" component={() => <ProtectedRoute component={VirtualCards} />} />
       <Route path="/security" component={() => <ProtectedRoute component={Security} />} />
+      <Route path="/notifications" component={() => <ProtectedRoute component={Notifications} />} />
+      <Route path="/fraud-cases" component={() => <ProtectedRoute component={FraudCases} />} />
+      <Route path="/audit-logs" component={() => <ProtectedRoute component={AuditLogs} adminOnly />} />
+      <Route path="/forgot-password" component={() => <PublicRoute component={ForgotPassword} />} />
       <Route component={NotFound} />
     </Switch>
   );

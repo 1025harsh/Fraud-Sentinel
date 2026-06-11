@@ -5,3 +5,6 @@ export * from "./alerts";
 export * from "./fraud_logs";
 export * from "./login_history";
 export * from "./virtual_cards";
+export * from "./fraud_cases";
+export * from "./notifications";
+export * from "./audit_logs";
