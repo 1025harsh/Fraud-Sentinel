@@ -1,0 +1,231 @@
+I have uploaded my existing Fraud Sentinel project ZIP.
+
+Analyze the complete codebase and transform it into a REAL-TIME BANKING GRADE CREDIT CARD FRAUD DETECTION PLATFORM.
+
+IMPORTANT:
+
+* Do NOT create a new project.
+* Modify the existing project only.
+* Preserve the current UI where possible.
+* Fix all broken functionality.
+* Remove all static/demo/mock data.
+* Connect everything to a real PostgreSQL database.
+
+ADMIN CONFIGURATION:
+
+* Admin Email: [hhr135696@gmail.com](mailto:hhr135696@gmail.com)
+* All fraud alerts, login alerts, OTP alerts, card block alerts, suspicious activity alerts, system alerts, and investigation reports must be sent to [hhr135696@gmail.com](mailto:hhr135696@gmail.com).
+
+DATABASE REQUIREMENTS:
+
+* PostgreSQL integration.
+* Automatic database migrations.
+* Create tables:
+
+  * users
+  * cards
+  * transactions
+  * fraud_alerts
+  * fraud_cases
+  * login_history
+  * notifications
+  * risk_scores
+  * audit_logs
+  * reports
+  * device_fingerprints
+
+AUTHENTICATION:
+
+* Registration
+* Secure Login
+* JWT Authentication
+* Password hashing using bcrypt
+* Forgot password by email
+* OTP verification
+* Multi-factor authentication
+* Session management
+* Role-based access control
+* Admin, Analyst, Customer roles
+* Account lock after multiple failed attempts
+
+REAL-TIME FEATURES:
+
+* WebSocket / Socket.IO implementation
+* Live transaction monitoring
+* Live fraud detection feed
+* Live dashboard updates
+* Live notifications
+* Live risk scoring
+* Real-time investigation queue
+
+AI/ML FRAUD DETECTION:
+
+* Fraud prediction model
+* Risk score generation (0-100)
+* Transaction anomaly detection
+* Behavioral biometrics
+* Spending pattern analysis
+* Merchant risk analysis
+* Geolocation risk analysis
+* Device fingerprint analysis
+* Impossible travel detection
+* Adaptive learning
+
+RISK ENGINE:
+
+Risk 0-30:
+Safe
+
+Risk 31-60:
+Medium Risk
+
+Risk 61-80:
+High Risk
+
+Risk 81-100:
+Fraud Detected
+
+Automatic Actions:
+
+* Flag transaction
+* Send email alert
+* Create fraud case
+* Freeze card
+* Notify admin
+
+CUSTOMER DASHBOARD:
+
+* User profile
+* Transaction history
+* Search transactions
+* Filter transactions
+* Spending analytics
+* Security center
+* Card management
+* Freeze card
+* Unfreeze card
+* Download reports
+* Fraud alerts page
+* Notification center
+
+ADMIN COMMAND CENTER:
+
+* Live fraud monitoring dashboard
+* Live transaction dashboard
+* User management
+* Card management
+* Fraud investigation panel
+* Case management
+* Alert management
+* Risk heatmap
+* Fraud trends
+* Suspicious account tracking
+* System health monitoring
+
+NOTIFICATIONS:
+Integrate:
+
+* Gmail SMTP (Nodemailer)
+* Twilio SMS
+* Push notifications
+
+Send alerts for:
+
+* Login detected
+* New device login
+* Suspicious login
+* High-value transaction
+* Fraud detected
+* Card blocked
+* Card unblocked
+* Password reset
+* OTP generated
+
+EMAIL CONFIGURATION:
+Use Gmail SMTP.
+
+Admin email:
+[hhr135696@gmail.com](mailto:hhr135696@gmail.com)
+
+Create environment variables:
+
+ADMIN_EMAIL=[hhr135696@gmail.com](mailto:hhr135696@gmail.com)
+SMTP_EMAIL=[hhr135696@gmail.com](mailto:hhr135696@gmail.com)
+SMTP_PASSWORD=GMAIL_APP_PASSWORD
+
+SECURITY:
+
+* CSRF protection
+* XSS protection
+* SQL injection prevention
+* Rate limiting
+* HTTPS support
+* Audit logging
+* API authentication
+* Data encryption
+* Secure cookies
+* Helmet security middleware
+
+CARD FEATURES:
+
+* Add card
+* Remove card
+* Freeze card
+* Unfreeze card
+* Set transaction limits
+* International transaction control
+* Virtual card generation
+
+REPORTING:
+
+* Daily reports
+* Weekly reports
+* Monthly reports
+* Fraud reports
+* Security reports
+* Export PDF
+* Export Excel
+
+UI IMPROVEMENTS:
+
+* Professional banking interface
+* Modern dark mode
+* Responsive design
+* Real-time widgets
+* Animated charts
+* Better dashboards
+* Loading states
+* Toast notifications
+* Error handling
+
+DEPLOYMENT:
+
+* Configure for Replit deployment
+* Production-ready environment variables
+* PostgreSQL configuration
+* Automatic database migration
+* Health check endpoint
+
+TESTING:
+
+* Authentication testing
+* Database testing
+* Fraud detection testing
+* API testing
+* WebSocket testing
+
+FINAL OUTPUT REQUIRED:
+
+1. Modify the existing project completely.
+2. Show every changed file.
+3. Explain all modifications.
+4. Generate database schema.
+5. Generate setup instructions.
+6. Generate deployment instructions.
+7. Verify login works.
+8. Verify database works.
+9. Verify real-time updates work.
+10. Verify email notifications work.
+11. Verify fraud detection works.
+
+The final application should behave like a real banking fraud detection platform with production-style architecture, real database storage, AI fraud analysis, real-time monitoring, secure authentication, email alerts to [hhr135696@gmail.com](mailto:hhr135696@gmail.com), and enterprise-grade dashboards.
